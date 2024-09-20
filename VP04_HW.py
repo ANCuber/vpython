@@ -2,9 +2,9 @@ import numpy as np
 from vpython import *
 
 A, N, omega = 0.10, 50, 2*pi/1.0
-size, m, k, d = 0.06, 0.1, 10.0, 0.4
+m, k, d = 0.1, 10.0, 0.4
 scene = canvas(title='Spring Wave', width=800, height=300, background=vec(0.5,0.5,0), center = vec((N-1)*d/2, 0, 0))
-msgt = text(text = 'Simulating for a few seconds...', pos = vec(0,2,0), height = 0.5)
+msgt = text(text = 'Simulating for a few seconds...', pos = vec(0,2,0), height = 0.4)
 sim_rate = 5000
 
 def Simulation(n):
