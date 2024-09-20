@@ -10,8 +10,8 @@ size = {'earth': 6.371E6*Mag, 'moon': 1.317E6*Mag, 'sun':6.95E8*Mag} #10 times l
 earth_orbit = {'r': 1.495E11, 'v': 2.9783E4}
 moon_orbit = {'r': 3.84E8, 'v': 1.022E3}
 theta = 5.145*pi/180.0
-sim_rate = 5000
-Slowing = 10
+sim_rate = 1000
+Slowing = 6
 
 #Set the scene
 scene = canvas(width=800, height=800, background=vector(0.5,0.5,0))
@@ -51,7 +51,7 @@ def G_Force(M, m, pos_vec):
 #bodies_c = [moon, earth, sun]
 c_bodies = [moon, earth, sun]
 bodies = [moon, earth]
-dt = 60*60*6/5
+dt = 60*60*6
 dt /= Slowing
 
 #Simulation
@@ -77,13 +77,16 @@ while True:
     aft = moon.pos-earth.pos
     crs = cross(pre,aft)
     cur = math.acos(dot(crs,vec(0,1,0))/mag(crs)*mag(vec(0,1,0)))
-    mx = max(cur,mx)
-    mn = min(cur,mn)
+    mx = max(mx,mag(earth.pos-sun.pos))
+    mn = min(mn,mag(earth.pos-sun.pos))
 
-    if cnt >= sim_rate*20:
+    '''
+    if cnt >= sim_rate*120:
         break
+    '''
 
     scene.center = earth.pos
     cnt += 1
+
 print(mx/(pi/180), mn/(pi/180))
 

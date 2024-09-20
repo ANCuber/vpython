@@ -1,21 +1,44 @@
 from vpython import *
 
-A, N, omega = 0.10, 50, 2*pi/1.0
-size, m, k, d = 0.06, 0.1, 10.0, 0.4
-scene = canvas(title='Spring Wave', width=800, height=300, background=vec(0.5,0.5,0), center = vec((N-1)*d/2, 0, 0))
-balls = [sphere(radius=size, color=color.red, pos=vector(i*d, 0, 0), v=vector(0,0,0)) for i in range(N)]
-springs = [helix(radius = size/2.0, thickness = d/15.0, pos=vector(i*d, 0, 0), axis=vector(d,0,0)) for i in range(N-1)]
-t, dt = 0, 0.001
+#constants
+G = 6.673E-11
+mass = {'sun':1.989E30, 'earth':5.972E24, 'moon':7.36E22}
+radius = {'earth':6.371E6*10, 'moon':1.317E6*10, 'sun':6.95E8*10}
+earth_orbit = {'r':1.495E11, 'v':2.9783E4}
+moon_orbit = {'r':3.84E8, 'v':1.022E3}
+axis = vec(0,1,0)
+theta = 5.145*pi/180
+
+def G_force(self,source):
+    return -G*self.m*source.m / mag2(self.pos-source.pos)*norm(self.pos-source.pos)
+
+#background
+scene = canvas(width=800, height=800, background=vec(0.5,0.5,0))
+scene.forward = vector(-1, -1, 0)
+#local_light(pos = vec(0,0,0))
+
+#object
+sun = sphere(pos=vec(0,0,0), radius = radius['sun'], m = mass['sun'], color = color.orange, emissive=True)
+earth = sphere(pos = vec(earth_orbit['r'],0,0), radius = radius['earth'], m = mass['earth'], texture={'file':textures.earth})
+moon = sphere(pos = earth.pos+vec(moon_orbit['r']*cos(theta),moon_orbit['r']*sin(theta),0), radius = radius['moon'], m = mass['moon'], color = color.white, make_trail = True)
+earth.v = vector(0, 0, -earth_orbit['v'])
+moon.v = earth.v + vector(0, 0, -moon_orbit['v'])
+sun.v = vec(0,0,0)
+
+#time
+dt=60*60
+t = 0
 
 while True:
+    scene.center = earth.pos
     rate(1000)
+    moon.a = (G_force(moon, earth)+G_force(moon,sun)) / moon.m
+    moon.v = moon.v + moon.a * dt
+    moon.pos = moon.pos + moon.v * dt
+    earth.a = (G_force(earth, moon)+G_force(earth,sun)) / earth.m
+    earth.v = earth.v + earth.a *dt
+    earth.pos = earth.pos + earth.v * dt
+    sun.a = (G_force(sun,moon)+G_force(sun,earth))/sun.m
+    sun.v = sun.v+sun.a*dt
+    sun.pos = sun.pos+sun.v*dt
     t += dt
-    balls[0].pos = vector(A * sin(omega * t ), 0, 0)
-    for i in range(N-1):
-        springs[i].pos = balls[i].pos
-        springs[i].axis = balls[i+1].pos - balls[i].pos
-    for i in range(1, N):
-        if i == N-1: balls[-1].v += - k * vector((springs[-1].axis.mag-d),0,0)/m*dt
-        else: balls[i].v += k* vector((springs[i].axis.mag-d),0,0)/m*dt - k* vector((springs[i-1].axis.mag-d),0,0)/m*dt
-        balls[i].pos += balls[i].v*dt
-
