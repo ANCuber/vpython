@@ -4,7 +4,8 @@ from vpython import *
 A, N, omega = 0.10, 50, 2*pi/1.0
 size, m, k, d = 0.06, 0.1, 10.0, 0.4
 scene = canvas(title='Spring Wave', width=800, height=300, background=vec(0.5,0.5,0), center = vec((N-1)*d/2, 0, 0))
-sim_rate = 2000
+msgt = text(text = 'Simulating for a few seconds...', pos = vec(0,2,0), height = 0.5)
+sim_rate = 3000
 
 '''
 balls = [sphere(radius=size, color=color.red, pos=vector(i*d, 0, 0), v=vector(0,0,0)) for i in range(N)] #3
@@ -20,8 +21,10 @@ ball_pos, ball_orig, ball_v, spring_len = np.arange(N)*d+A*np.sin(phase), np.ara
 
 t, dt = 0, 0.0003
 
-hT, flg, esp, cnt, avgcnt = 0, 0, 0.001, 0, 0
-std = 5
+T, flg, esp, cnt, avgcnt = 0, 0, 0.000001, 0, 0
+std = 0
+mxd = -1e9
+ins = 0
 
 while True:
     rate(sim_rate)
@@ -40,19 +43,37 @@ while True:
     
     ball_disp = ball_pos - ball_orig
     
+    '''
+    for i in range(N): balls[i].pos.x = ball_pos[i] #3
+    for i in range(N-1): #3
+        springs[i].pos = balls[i].pos #3
+        springs[i].axis = balls[i+1].pos - balls[i].pos #3
+    '''
+    
     for i in range(N): #drawing the wave
         c.modify(i, y = ball_disp[i]*4+1)
 
     #period
-    if ball_disp[std] <= esp and ball_disp[std] >= -esp:
-        if flg != 0:
-            hT = ((t-flg)+hT*avgcnt)/(avgcnt+1)
-            avgcnt += 1
-        flg = t
+    if cnt <= sim_rate*2:
+        mxd = max(mxd,spring_len[std])
+    else: 
+        if spring_len[std] <= mxd+esp and spring_len[std] >= mxd-esp:
+            if flg != 0 and ins == 0:
+                #print(t-flg)
+                T = ((t-flg)+T*avgcnt)/(avgcnt+1)
+                avgcnt += 1
+            ins = 1
+            flg = t
+        else:
+            ins = 0
 
     #output
-    if cnt%5000 == 0:
-        print(2*hT)
+    if cnt == sim_rate*5:
+        print("Period:",T)
+        msg1 = text(text = 'Period: '+str(T)+' (s)', pos = vec(0,-0.5,0), height = 0.4)
+        print("Angular Frequency:",2*pi/T)
+        msg2 = text(text = 'Angular Frequency: '+str(2*pi/T)+' (rad/s)', pos = vec(0,-1.5,0), height = 0.4)
+        break
     
 
 
