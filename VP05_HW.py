@@ -6,7 +6,6 @@ L = ((24.4E-3/(6E23))*N)**(1/3.0)/50 # 2L is the length of the cubic container b
 m = 14E-3/6E23 # average mass of O and C
 k, T = 1.38E-23, 298.0 # some constants to set up the initial speed
 initial_v = (3*k*T/m)**0.5 # some constant
-shr = 0.3 # some constant
 
 scene = canvas(width = 400, height =400, align = 'left', background = vec(1, 1, 1))
 container = box(length = 2*L, height = 2*L, width = 2*L, opacity=0.4, color = color.yellow )
@@ -36,44 +35,46 @@ t = 0 # current time
 #Collision function
 def Collision(b1, b2):
     colvec = b2.pos-b1.pos
-    u1 = b1.v+(2*b2.m/(b1.m+b2.m))*colvec*dot(colvec,b2.v-b1.v)/dot(colvec,colvec)
-    u2 = b2.v+(2*b1.m/(b1.m+b2.m))*colvec*dot(colvec,b1.v-b2.v)/dot(colvec,colvec)
-    b1.v = u1
-    b2.v = u2
+    if dot(colvec,b1.v-b2.v) > 0:
+        u1 = b1.v+(2*b2.m/(b1.m+b2.m))*colvec*dot(colvec,b2.v-b1.v)/dot(colvec,colvec)
+        u2 = b2.v+(2*b1.m/(b1.m+b2.m))*colvec*dot(colvec,b1.v-b2.v)/dot(colvec,colvec)
+        b1.v = u1
+        b2.v = u2
 
 while True:
-    rate(3000)
+    #rate(300000)
     for CO in COs:
         CO.time_lapse(dt)
         
     # collisions between the atoms of different molecules
     for i in range(N-1):
         for j in range(i+1,N):
-            if mag(COs[i].O.pos-COs[j].O.pos) <= (COs[i].O.radius+COs[j].O.radius)*shr:
+            if mag(COs[i].O.pos-COs[j].O.pos) <= (COs[i].O.radius+COs[j].O.radius):
                 Collision(COs[i].O,COs[j].O)
-            if mag(COs[i].O.pos-COs[j].C.pos) <= (COs[i].O.radius+COs[j].C.radius)*shr:
+            if mag(COs[i].O.pos-COs[j].C.pos) <= (COs[i].O.radius+COs[j].C.radius):
                 Collision(COs[i].O,COs[j].C)
-            if mag(COs[i].C.pos-COs[j].O.pos) <= (COs[i].C.radius+COs[j].O.radius)*shr:
+            if mag(COs[i].C.pos-COs[j].O.pos) <= (COs[i].C.radius+COs[j].O.radius):
                 Collision(COs[i].C,COs[j].O)
-            if mag(COs[i].C.pos-COs[j].C.pos) <= (COs[i].C.radius+COs[j].C.radius)*shr:
+            if mag(COs[i].C.pos-COs[j].C.pos) <= (COs[i].C.radius+COs[j].C.radius):
                 Collision(COs[i].C,COs[j].C)
             
     # collisions of the atoms on walls
     for CO in COs:
         #O
-        if CO.O.pos.x >= L-CO.O.radius or CO.O.pos.x <= -L+CO.O.radius:
+        if abs(CO.O.pos.x) >= L-CO.O.radius and CO.O.v.x*CO.O.v.x > 0:
             CO.O.v.x *= -1
-        if CO.O.pos.y >= L-CO.O.radius or CO.O.pos.y <= -L+CO.O.radius:
+        if abs(CO.O.pos.y) >= L-CO.O.radius and CO.O.v.y*CO.O.v.y > 0:
             CO.O.v.y *= -1
-        if CO.O.pos.z >= L-CO.O.radius or CO.O.pos.z <= -L+CO.O.radius:
+        if abs(CO.O.pos.z) >= L-CO.O.radius and CO.O.v.z*CO.O.v.z > 0:
             CO.O.v.z *= -1
+
         
         #C
-        if CO.C.pos.x >= L-CO.C.radius or CO.C.pos.x <= -L+CO.C.radius:
+        if abs(CO.C.pos.x) >= L-CO.C.radius and CO.C.v.x*CO.C.v.x > 0:
             CO.C.v.x *= -1
-        if CO.C.pos.y >= L-CO.C.radius or CO.C.pos.y <= -L+CO.C.radius:
+        if abs(CO.C.pos.y) >= L-CO.C.radius and CO.C.v.y*CO.C.v.y > 0:
             CO.C.v.y *= -1
-        if CO.C.pos.z >= L-CO.C.radius or CO.C.pos.z <= -L+CO.C.radius:
+        if abs(CO.C.pos.z) >= L-CO.C.radius and CO.C.v.z*CO.C.v.z > 0:
             CO.C.v.z *= -1
 
     
