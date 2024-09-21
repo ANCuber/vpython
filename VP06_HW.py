@@ -8,6 +8,7 @@ m, size = 4E-3/6E23, 31E-12*10 # He atom are 10 times bigger for easiear collisi
 L = ((24.4E-3/(6E23))*N)**(1/3.0)/2 + size # 2L is the cubic container's original length, width, and height
 Lx, Ly, Lz = 2*L, 2*L, 2*L
 k, T = 1.38e-23, 298.0 # boltzmann constant and initial temperature
+gamma = 5/3
 t, dt = 0, 3e-13
 vrms = (2*k*1.5*T/m)**0.5 # the initial root mean square velocity
 stage = 0 # stage number
@@ -66,7 +67,6 @@ def cmpzero(x):
 times = 0
 P_imp = 0
 flg = 0 # used to control stage switching
-gamma = 5/3
 
 # keyboard input
 def NextStage():
