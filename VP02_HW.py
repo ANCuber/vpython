@@ -21,7 +21,7 @@ top_balls = []
 ropes = []
 balls = []
 
-#Building the device and Lifting the ball(s)
+#Build the device and Lift the ball(s)
 for i in range(5):
     top_balls.append(sphere(radius = ball_size*0.2, color = color.white, pos = vec((i-2)*0.4,top,0)))
     
@@ -34,8 +34,6 @@ for i in range(5):
     balls[i].v = vec(0,0,0)
     balls[i].m = ball_m
     ropes.append(cylinder(radius = ball_size*0.1, pos = top_balls[i].pos, axis = balls[i].pos-top_balls[i].pos))
-
-print("Pre-building succeeded.")
 
 #Significant function(s)
 def Collision(b1, b2):
@@ -57,8 +55,6 @@ U_avg = gcurve(graph = GraphWin2, color = color.green, width = 2)
 #Ek_msg = text(text = "All Kinetic Energies: Blue Line", scene = GraphWin, color = color.blue)
 
 #Simulation
-print("Simulation begins.")
-
 while True:
     t += dt#Update the current time
     rate(sim_rate)
