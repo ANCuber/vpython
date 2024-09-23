@@ -130,7 +130,7 @@ while True:
     # find collisions between the atoms and the walls, and handle their elastic collisions
     for i in range(N):
         if abs(p_a[i][0]) >= Lx/2 - size and p_a[i][0]*v_a[i][0] > 0:
-            P_imp += abs(v_a[i][0]*m*2)
+            P_imp += abs(v_a[i][0]*m*2)+abs(2*v_W*stgctrl*m)
             v_a[i][0] = - (v_a[i][0] + 2*v_W*cmpzero(v_a[i][0])*stgctrl)
         if abs(p_a[i][1]) >= Ly/2 - size and p_a[i][1]*v_a[i][1] > 0:
             P_imp += abs(v_a[i][1]*m*2)
