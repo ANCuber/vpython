@@ -14,8 +14,6 @@ sim_rate = 1000
 
 #Set the scene
 scene = canvas(width=800, height=800, background=vector(0.5,0.5,0), align = 'left')
-#scene.light = []
-#local_light(pos = vec(0,0,0))
 
 #Celestial body class
 class c_body(sphere):
@@ -94,7 +92,6 @@ while True:
     #Consider gravity
     for cbody in c_bodies:
         cbody.a = vec(0,0,0)
-        
         for center in c_bodies:
             cbody.a += G_Force(center.m,cbody.m,cbody.pos-center.pos)/cbody.m
         
@@ -103,14 +100,8 @@ while True:
         cbody.pos += cbody.v*dt
     
     if cnt%1000 == 0:
-        angle.plot(pos = (cnt*1e-6, dot(norm(cross(moon.pos-earth.pos,moon.v-earth.v)),vec(1,0,0))))
+        angle.plot(pos = (cnt*dt/86400/364.2422, dot(norm(cross(moon.pos-earth.pos,moon.v-earth.v)),vec(1,0,0))))
     
-
-    #ear.pos = earth.pos
-    #mar.pos = earth.pos
-    #ear.axis = 2*size['earth']*vec(0,1,0)
-    #mar.axis = 2*size['earth']*norm(cross(moon.pos-earth.pos,moon.v-earth.v))
-
     scene.center = earth.pos
     cnt += 1
 
