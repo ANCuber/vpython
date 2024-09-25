@@ -98,6 +98,7 @@ while True:
         for center in c_bodies:
             cbody.a += G_Force(center.m,cbody.m,cbody.pos-center.pos)/cbody.m
         
+    for cbody in c_bodies:
         cbody.v += cbody.a*dt
         cbody.pos += cbody.v*dt
     
