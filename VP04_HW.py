@@ -16,7 +16,7 @@ def Simulation(n):
     spring_len = np.ones(N)*d
 
     t, dt = 0, 0.0003
-    preset = 6
+    preset = 8
 
     T, flg, esp, cnt, avgcnt = 0, 0, 0.000001, 0, 0
     std = 0
