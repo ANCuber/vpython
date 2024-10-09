@@ -14,6 +14,10 @@ sim_rate = 1000
 
 #Set the scene
 scene = canvas(width=800, height=800, background=vector(0.5,0.5,0), align = 'left')
+info = canvas(width=600, height=600, background=vector(0.25,0.25,0.25), align = 'right')
+
+#Some info
+msg_start = text(text = 'Simulating... Please wait for a moment.', canvas = info, pos = vec(-10,0,0))
 
 #Celestial body class
 class c_body(sphere):
@@ -26,9 +30,9 @@ def CM(m1, m2, p1, p2):
     return (m1*p1 + m2*p2)/(m1+m2)
 
 #Set celestial bodies
-sun = c_body(pos = vec(0,0,0), m = mass['sun'], radius = size['sun'], color = color.orange, emissive = True)
-earth = c_body(pos = vec(0,0,0), m = mass['earth'], radius = size['earth'], texture = {'file':textures.earth}, make_trail = True)
-moon = c_body(pos = vec(moon_orbit['r']*cos(theta),moon_orbit['r']*sin(theta),0), m = mass['moon'], radius = size['moon'])
+sun = c_body(canvas = scene, pos = vec(0,0,0), m = mass['sun'], radius = size['sun'], color = color.orange, emissive = True)
+earth = c_body(canvas = scene, pos = vec(0,0,0), m = mass['earth'], radius = size['earth'], texture = {'file':textures.earth}, make_trail = True)
+moon = c_body(canvas = scene, pos = vec(moon_orbit['r']*cos(theta),moon_orbit['r']*sin(theta),0), m = mass['moon'], radius = size['moon'])
 
 #position
 C_em = CM(earth.m,moon.m,earth.pos,moon.pos)
@@ -63,14 +67,6 @@ def G_Force(M, m, pos_vec):
 c_bodies = [moon, earth, sun]
 dt = 60*60*6/100
 
-#Graph
-precession = graph(width = 500, align = 'right')
-angle = gdots(graph = precession, color = color.blue, radius = 1)
-#func2 = gcurve(graph = precession, color = color.green)
-
-ear = arrow(pos = earth.pos, color = color.red, shaftwidth = size['earth']*0.1)
-mar = arrow(pos = earth.pos, color = color.blue, shaftwidth = size['earth']*0.1)
-
 #Simulation
 print("Simulation begins.")
 
@@ -86,8 +82,8 @@ while True:
         ref = dot(norm(cross(moon.pos-earth.pos,moon.v-earth.v)),vec(1,0,0))
         pre = cnt
     if cnt > 1e6 and abs(dot(norm(cross(moon.pos-earth.pos,moon.v-earth.v)),vec(1,0,0)) - ref) <= esp:
-        print("The precession period is about", (cnt-pre)*dt/86400/364.2422,"years.")
-        cnt = 0
+        msg_result = text(text = "The precession period is about "+str("{:.5f}".format(round((cnt-pre)*dt/86400/364.2422,5)))+" years.", pos = vec(-10,-3,0), canvas = info)
+        break
     
     #Consider gravity
     for cbody in c_bodies:
@@ -98,9 +94,6 @@ while True:
     for cbody in c_bodies:
         cbody.v += cbody.a*dt
         cbody.pos += cbody.v*dt
-    
-    if cnt%1000 == 0:
-        angle.plot(pos = (cnt*dt/86400/364.2422, dot(norm(cross(moon.pos-earth.pos,moon.v-earth.v)),vec(1,0,0))))
     
     scene.center = earth.pos
     cnt += 1
