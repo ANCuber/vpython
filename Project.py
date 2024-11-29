@@ -1,23 +1,22 @@
 from vpython import *
 import numpy as np
-import random
 
 # Constants
 g = 9.8  # gravitational acceleration (m/s^2)
-k = 0.002  # air drag coefficient (arbitrary unit)
+k = 0.1  # air drag coefficient (arbitrary unit)
 dt = 0.01  # time step (s)
 
 # Parameters of pendulums
 m1, m2, m3 = 1.0, 1.0, 1.0  # masses (kg)
-L1, L2, L3 = 2*random.random(), 2*random.random(), 2*random.random() # lengths (m)
+L1, L2, L3 = 1.0, 1.0, 1.0  # lengths (m)
 radii = 0.05  # radius of pendulum bobs
 
 # Initial angles (in radians)
 theta1, theta2, theta3 = np.pi / 4, np.pi / 6, np.pi / 3
-omega1, omega2, omega3 = 11, -7, 3 # angular velocities
+omega1, omega2, omega3 = 0.0, 0.0, 0.0  # angular velocities
 
 # Create the scene
-scene = canvas(title="Triple Pendulum Simulation with Energy Tracking", width=800, height=600, align = 'left')
+scene = canvas(title="Triple Pendulum Simulation with Energy Tracking", width=600, height=600, align = 'left')
 ceiling = box(pos=vector(0, 0, 0), size=vector(0.1, 0.1, 0.1), color=color.gray(0.5))
 
 # Pendulum components
