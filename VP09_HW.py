@@ -1,75 +1,50 @@
+from vpython import *
 import numpy as np
 
-# Constants
-mu_0 = 4 * np.pi * 1e-7  # Permeability of free space (H/m)
-R = 0.12  # Radius of large loop (m)
-r = 0.06  # Radius of small loop (m)
-Height = 0.10  # Separation between loops (m)
-num_points = 100000  # Discretization of loops
+R1, R2 = 0.06, 0.12  
+z1, z2 = 0.10, 0.00 
+I = 1.0  
+mu = 4 * np.pi * 1e-7  
 
-# Generate points along the large loop
-theta = np.linspace(0, 2*np.pi, num_points, endpoint=False)
-large_loop_x = R * np.cos(theta)
-large_loop_y = R * np.sin(theta)
-large_loop_z = np.zeros(num_points)
+N, M = 1000, 1000
 
-def magnetic_field_Bz(x, y, z, I, loop_x, loop_y, loop_z):
-    """
-    Compute the z-component of the magnetic field at (x, y, z) due to a current loop using Biot-Savart Law.
-    """
-    Bz_total = 0
-    dtheta = 2 * np.pi / num_points
-    
-    for i in range(num_points):
-        # Current element dL
-        dx = -loop_y[i] * dtheta  # -R sin(theta) dtheta
-        dy = loop_x[i] * dtheta  # R cos(theta) dtheta
-        dz = 0
-        
-        # Position vector from source to field point
-        rx = x - loop_x[i]
-        ry = y - loop_y[i]
-        rz = z - loop_z[i]
-        r = np.sqrt(rx**2 + ry**2 + rz**2)
-        
-        if r == 0:
-            continue  # Avoid singularity
-        
-        # Biot-Savart Law
-        dBz = mu_0 * I / (4 * np.pi) * (dx * ry - dy * rx) / (r**3)
-        Bz_total += dBz
-    
-    return Bz_total
+def LoopCoord(R, i, z):
+    return R*cos(2*pi*i/N), R*sin(2*pi*i/N), z
 
-# Compute mutual inductance M_21 (flux through small loop due to current in large loop)
-I_large = 1  # Assume unit current in the large loop
-flux_21 = 0
+def AreaCoord(R, i, z):
+    return R*(i/M), 0, z
 
-theta_small = np.linspace(0, 2*np.pi, num_points, endpoint=False)
-small_loop_x = r * np.cos(theta_small)
-small_loop_y = r * np.sin(theta_small)
-small_loop_z = np.full(num_points, Height)
+def BiotSavart(Pnt, lpnts, dls):
+    r = Pnt-lpnts
+    return np.sum((I * mu / (4*pi)) * (np.cross(dls, r)) / (np.linalg.norm(r, axis=1) ** 3)[:, None], axis=0)
 
-dA = np.pi * r**2 / num_points  # Area element of small loop
+SmallLoopCut = np.array([LoopCoord(R1, i, z1) for i in range(N+1)])
+Small_dl = SmallLoopCut[1:] - SmallLoopCut[:N]
+# SmallLoopPnt = (SmallLoopCut[1:] + SmallLoopCut[:N]) / 2
+SmallLoopPnt = SmallLoopCut[:N]
+LargeLoopCut = np.array([LoopCoord(R2, i, z2) for i in range(N+1)])
+Large_dl = LargeLoopCut[1:] - LargeLoopCut[:N]
+# LargeLoopPnt = (LargeLoopCut[1:] + LargeLoopCut[:N]) / 2
+LargeLoopPnt = LargeLoopCut[:N]
 
-for i in range(num_points):
-    Bz = magnetic_field_Bz(small_loop_x[i], small_loop_y[i], small_loop_z[i], I_large, large_loop_x, large_loop_y, large_loop_z)
-    flux_21 += Bz * dA
-    
-M_21 = flux_21 / I_large
+SmallAreaPar = np.array([AreaCoord(R1, i, z1) for i in range(M+1)])
+LargeAreaPar = np.array([AreaCoord(R2, i, z2) for i in range(M+1)])
+SmallAreaPnt = (SmallAreaPar[1:] + SmallAreaPar[:M]) / 2;
+LargeAreaPnt = (LargeAreaPar[1:] + LargeAreaPar[:M]) / 2;
 
-# Compute mutual inductance M_12 (flux through large loop due to current in small loop)
-I_small = 1  # Assume unit current in the small loop
-flux_12 = 0
+SmallMag = np.array([BiotSavart(SmallAreaPnt[i], LargeLoopPnt, Large_dl) for i in range(M)])
+LargeMag = np.array([BiotSavart(LargeAreaPnt[i], SmallLoopPnt, Small_dl) for i in range(M)])
 
-dA = np.pi * R**2 / num_points  # Area element of large loop
+zeros = np.zeros((M, 2), dtype=int)
 
-for i in range(num_points):
-    Bz = magnetic_field_Bz(large_loop_x[i], large_loop_y[i], large_loop_z[i], I_small, small_loop_x, small_loop_y, small_loop_z)
-    flux_12 += Bz * dA
-    
-M_12 = flux_12 / I_small
+SmallAreaZ = (np.linalg.norm(SmallAreaPar[1:], axis=1)**2 - np.linalg.norm(SmallAreaPar[:M], axis=1)**2) * pi
+LargeAreaZ = (np.linalg.norm(LargeAreaPar[1:], axis=1)**2 - np.linalg.norm(LargeAreaPar[:M], axis=1)**2) * pi
 
-print(f"Mutual Inductance M_21: {M_21:.6e} H")
-print(f"Mutual Inductance M_12: {M_12:.6e} H")
+SmallArea = np.hstack((zeros, SmallAreaZ.reshape(-1,1)))
+LargeArea = np.hstack((zeros, LargeAreaZ.reshape(-1,1)))
 
+SmallFlux = np.sum(np.sum(SmallArea * SmallMag, axis=1))
+LargeFlux = np.sum(np.sum(LargeArea * LargeMag, axis=1))
+
+print("Magnetic flux inside the smaller loop:", abs(SmallFlux))
+print("Magnetic flux inside the larger loop:", abs(LargeFlux))
