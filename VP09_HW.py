@@ -3,7 +3,7 @@ import numpy as np
 
 R1, R2 = 0.06, 0.12  
 z1, z2 = 0.10, 0.00 
-I = 1.0  
+I = 1.0
 mu = 4 * np.pi * 1e-7  
 
 N, M = 1000, 1000
@@ -46,5 +46,5 @@ LargeArea = np.hstack((zeros, LargeAreaZ.reshape(-1,1)))
 SmallFlux = np.sum(np.sum(SmallArea * SmallMag, axis=1))
 LargeFlux = np.sum(np.sum(LargeArea * LargeMag, axis=1))
 
-print("Magnetic flux inside the smaller loop:", abs(SmallFlux))
-print("Magnetic flux inside the larger loop:", abs(LargeFlux))
+print(f"Magnetic flux inside the smaller loop: {abs(SmallFlux)}")
+print(f"Magnetic flux inside the larger loop: {abs(LargeFlux)}")
