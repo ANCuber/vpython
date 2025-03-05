@@ -18,15 +18,11 @@ def refraction_vector(n1, n2, v_in, normal_v):
     v_in = hat(v_in)
     normal_v = hat(normal_v)
     cos_theta = dot(v_in, normal_v)
-    if cos_theta < 0:
-        print("Error")
-    # sin_theta_2 = 1 - cos_theta**2
-    # sin_phi_2 = ((n1/n2)**2) * sin_theta_2
     v_par = cos_theta * normal_v
     v_ver = v_in-v_par
     v_out = v_par + v_ver*(n1/n2)
         
-    return hat(v_out)  
+    return hat(v_out)
 
 R = 4.0
 thickness = 0.3
@@ -34,13 +30,13 @@ g1center = vec(-R + thickness/2, 0, 0)
 g2center = vec(R - thickness/2, 0, 0)
 nair = 1
 nglass = 1.5
-eps = 1e-5
+eps = 1e-3
 
 for angle in range(-7, 2):
     ray = sphere (pos=vec(-6, 0.5, 0), color = color.blue, radius = 0.01, make_trail=True)
-    ray.v = vector (0.01*cos(angle/40.0), 0.01*sin(angle/40.0), 0)
+    ray.v = vector (0.1*cos(angle/40.0), 0.1*sin(angle/40.0), 0)
 
-    dt = 0.002
+    dt = 0.001
     cnt1, cnt2 = 0, 0
     v1, v2 = vec(0,0,0), vec(0,0,0)
     
@@ -49,10 +45,10 @@ for angle in range(-7, 2):
         ray.pos = ray.pos + ray.v*dt
         
         if cnt1 == 0 and mag(ray.pos - g2center) <= R+eps and mag(ray.pos - g2center) >= R-eps and ray.pos.x <= 0: 
-            ray.v = 0.01*refraction_vector(nair, nglass, ray.v, -ray.pos+g2center)
+            ray.v = 0.1*refraction_vector(nair, nglass, ray.v, -ray.pos+g2center)
             cnt1 += 1
         if cnt2 == 0 and mag(ray.pos - g1center) <= R+eps and mag(ray.pos - g1center) >= R-eps and ray.pos.x >= 0: 
-            ray.v = 0.01*refraction_vector(nglass, nair, ray.v, ray.pos-g1center)
+            ray.v = 0.1*refraction_vector(nglass, nair, ray.v, ray.pos-g1center)
             cnt2 += 1
 
         if ray.pos.x >= 12 or ray.pos.x < -6:
