@@ -17,7 +17,7 @@ def vpr(t):
 
 
 t = 0
-dt = 1.0/(F * 5000)
+dt = 1.0/(F * 3000)
 
 scene1 = graph(align = 'left', xtitle='t', ytitle='i (A) blue, v (100V) red, i_the (A) yellow', background=vector(0.2, 0.6, 0.2))
 scene2 = graph(align = 'left', xtitle='t', ytitle='Energy (J)', background=vector(0.2, 0.6, 0.2))
@@ -49,6 +49,7 @@ def solve_and_plot_vpython(fx, A, B, C, y0, dy0, x_range, dx, scene, y_graph):
     y1 = y0
     y2 = dy0
     x = x0
+    y3 = y0
 
     # VPython plot setup
     # scene = graph(title="Solution to Ay'' + By' + Cy = f(x)", xtitle='x', ytitle='y')
@@ -60,8 +61,8 @@ def solve_and_plot_vpython(fx, A, B, C, y0, dy0, x_range, dx, scene, y_graph):
     flg = 0
 
     while x <= x_end:
-        sumi += y1*dx
         i_the = 0.40156 * sin(2 * pi * F * x - 70 / 180 * pi)
+        sumi += y1*dx
 
         x_vals.append(x)
         y_vals.append(y1)
@@ -72,7 +73,9 @@ def solve_and_plot_vpython(fx, A, B, C, y0, dy0, x_range, dx, scene, y_graph):
         else:
             ith.plot(x, 0)
         if x > 0:
-            E_t.plot(x, (L/2)*y1*y1 + (sumi)*(sumi)/(2*C))
+            E_t.plot(x, (L*y1*y1/2 + sumi*sumi/2/C))
+            # if L*y1*y1/2 + sumi/C/2*sumi < 1e-8:
+            #     print(y1, sumi)
         
         if abs(x-12*T) <= 1e-7:
             E = (L/2)*y1*y1 + sumi*sumi/(2*C)
@@ -108,6 +111,7 @@ def solve_and_plot_vpython(fx, A, B, C, y0, dy0, x_range, dx, scene, y_graph):
         y2 += (k1_2 + 2*k2_2 + 2*k3_2 + k4_2) / 6
 
         x += dx
+        y3 = y1
     print("I_cal:", mx)
     print("I_the:", 0.40156)
 
